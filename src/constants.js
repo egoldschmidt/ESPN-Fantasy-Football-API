@@ -111,6 +111,32 @@ const nflTeamIdToNFLTeamAbbreviation = {
 };
 
 /**
+ * Captures the values of `statSplitTypeId` in `stat` entries.
+ * Full list is defined in `espn-config-data.js`
+ *
+ * @type {object}
+ */
+const statSplitTypes = {
+  season: 0,
+  game: 1,
+  ros: 2,
+}
+
+/**
+ * Captures the values of `statSourceId` in `stat` entries.
+ * Full list is defined in `espn-config-data.js`
+ *
+ * @type {object}
+ */
+const statSources = {
+  real: 0,
+  projected: 1,
+}
+
+/** Maximum scoringPeriodId. */
+const maxScoringPeriodId = 17;
+
+/**
  * All possible ways a player may be acquired onto a fantasy football team roster.
  * @typedef {
  *   'FREEAGENCY' |
@@ -254,5 +280,8 @@ const nflTeamIdToNFLTeamAbbreviation = {
 export {
   nflTeamIdToNFLTeam,
   nflTeamIdToNFLTeamAbbreviation,
-  slotCategoryIdToPositionMap
+  slotCategoryIdToPositionMap,
+  statSplitTypes,
+  statSources,
+  maxScoringPeriodId,
 };
