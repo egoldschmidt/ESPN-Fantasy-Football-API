@@ -53,31 +53,31 @@ describe('PlayerSeason', () => {
         appliedTotal: 3.1,
         appliedStats: {
           24: 1.1,
-          25: 2,
+          25: 2
         },
         seasonId,
         stats: {
           24: 1.4,
-          25: 3,
+          25: 3
         },
         scoringPeriodId: 15,
         statSourceId: 0,
-        statSplitTypeId: 1,
+        statSplitTypeId: 1
       };
       weeklyActualStats2 = {
         appliedTotal: 5.2,
         appliedStats: {
           24: 2.2,
-          25: 3,
+          25: 3
         },
         seasonId,
         stats: {
           24: 1.8,
-          25: 1,
+          25: 1
         },
         scoringPeriodId: 16,
         statSourceId: 0,
-        statSplitTypeId: 1,
+        statSplitTypeId: 1
       };
 
       data = {
@@ -86,7 +86,7 @@ describe('PlayerSeason', () => {
             seasonProjectedStats,
             seasonActualStats,
             weeklyActualStats1,
-            weeklyActualStats2,
+            weeklyActualStats2
           ]
         }
       };

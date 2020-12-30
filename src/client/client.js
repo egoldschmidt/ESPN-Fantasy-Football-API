@@ -220,40 +220,39 @@ class Client {
       // Detect this as a 404 and retry the request against the new endpoint.
       // Inelegant, but works well enough and avoids downstream customers needing
       // to deal with current vs. previous season details.
-      if (error.response.status == 404) {
+      if (error.response.status === 404) {
         return this._getCurrentPlayerSeason({ seasonId, playerId });
-      } else {
-        throw error;
       }
+      throw error;
     });
   }
 
   _getCurrentPlayerSeason({ seasonId, playerId }) {
     const route = this.constructor._buildRoute({
       base: `${seasonId}/segments/0/leagues/${this.leagueId}`,
-      params: `?view=kona_playercard`
+      params: '?view=kona_playercard'
     });
 
     const config = this._buildAxiosConfig({
       headers: {
         'x-fantasy-filter': JSON.stringify({
           players: {
-            filterIds: {value: [playerId]},
+            filterIds: { value: [playerId] },
             filterStatsForTopScoringPeriodIds: {
               value: 17, // Somehow this seems to request each week's data
               additionalValue: [
                 `00${seasonId}`, // Season actuals
-                `01${seasonId}`  // Season projections
+                `01${seasonId}` // Season projections
               ]
-            },
+            }
           }
         })
       }
     });
 
-    return axios.get(route, config).then((response) => {
-      return PlayerSeason.buildFromServer(response.data.players[0], { leagueId: this.leagueId, seasonId });
-    });
+    return axios.get(route, config).then((response) => (
+      PlayerSeason.buildFromServer(response.data.players[0], { leagueId: this.leagueId, seasonId })
+    ));
   }
 
   _getPriorPlayerSeason({ seasonId, playerId }) {
@@ -267,15 +266,17 @@ class Client {
       headers: {
         'x-fantasy-filter': JSON.stringify({
           players: {
-            filterIds: {value: [playerId]},
+            filterIds: { value: [playerId] }
           }
         })
       }
     });
 
-    return axios.get(route, config).then((response) => {
-      return PlayerSeason.buildFromServer(response.data[0].players[0], { leagueId: this.leagueId, seasonId });
-    });
+    return axios.get(route, config).then((response) => (
+      PlayerSeason.buildFromServer(
+        response.data[0].players[0], { leagueId: this.leagueId, seasonId }
+      )
+    ));
   }
 
   /**

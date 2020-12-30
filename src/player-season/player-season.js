@@ -6,10 +6,9 @@ import { parsePlayerStats } from '../player-stats/player-stats';
 import {
   statSplitTypes,
   statSources,
-  maxScoringPeriodId,
+  maxScoringPeriodId
 } from '../constants.js';
 
-/* global PlayerStats */
 /* global PlayerStatsBundle */
 
 /**
@@ -27,7 +26,8 @@ class PlayerSeason extends BaseObject {
    * @property {number} seasonId The season during which this player played.
    * @property {PlayerStatsBundle} seasonActual The actual stats accrued this season.
    * @property {PlayerStatsBundle} seasonProjected The projected stats for this season.
-   * @property {Object.<string, PlayerStatsBundle>} weeklyActual The actual stats accrued this season, broken down by week.
+   * @property {object.<string, PlayerStatsBundle>} weeklyActual The actual stats accrued this
+   *                                                season, broken down by week.
    */
 
   /**
@@ -54,7 +54,7 @@ class PlayerSeason extends BaseObject {
           constructorParams,
           seasonId: constructorParams.seasonId,
           statSourceId: statSources.real,
-          statSplitTypeId: statSplitTypes.season,
+          statSplitTypeId: statSplitTypes.season
         };
         return {
           points: parsePlayerStats({
@@ -66,9 +66,9 @@ class PlayerSeason extends BaseObject {
             usesPoints: false,
             statKey: 'stats',
             ...params
-          }),
+          })
         };
-      },
+      }
     },
     seasonProjected: {
       key: 'player',
@@ -78,7 +78,7 @@ class PlayerSeason extends BaseObject {
           constructorParams,
           seasonId: constructorParams.seasonId,
           statSourceId: statSources.projected,
-          statSplitTypeId: statSplitTypes.season,
+          statSplitTypeId: statSplitTypes.season
         };
         return {
           points: parsePlayerStats({
@@ -90,22 +90,22 @@ class PlayerSeason extends BaseObject {
             usesPoints: false,
             statKey: 'stats',
             ...params
-          }),
+          })
         };
-      },
+      }
     },
     weeklyActual: {
       key: 'player',
       manualParse: (responseData, data, constructorParams) => {
         const weeklyData = {};
-        for (let i = 1; i <= maxScoringPeriodId; i++) {
+        for (let i = 1; i <= maxScoringPeriodId; i += 1) {
           const params = {
             responseData: data,
             constructorParams,
             seasonId: constructorParams.seasonId,
             scoringPeriodId: i,
             statSourceId: statSources.real,
-            statSplitTypeId: statSplitTypes.game,
+            statSplitTypeId: statSplitTypes.game
           };
           const points = parsePlayerStats({
             usesPoints: true,
@@ -118,12 +118,12 @@ class PlayerSeason extends BaseObject {
             ...params
           });
           if (points || stats) {
-            weeklyData[i] = {points, stats};
+            weeklyData[i] = { points, stats };
           }
         }
         return weeklyData;
-      },
-    },
+      }
+    }
   };
 }
 
