@@ -98,6 +98,24 @@ describe('parsePlayerStats', () => {
 
       expect(stats).toBeInstanceOf(PlayerStats);
       expect(stats.rushingYards).toBe(318);
+      expect(stats.totalPoints).toBe(null);
+    });
+  });
+
+  describe('when stats represent points', () => {
+    test('total points are computed', () => {
+      const stats = parsePlayerStats({
+        responseData: data,
+        constructorParams: {},
+        usesPoints: true,
+        seasonId: 2018,
+        statKey: 'appliedStats',
+        statSourceId: 0,
+        statSplitTypeId: 1
+      });
+
+      expect(stats).toBeInstanceOf(PlayerStats);
+      expect(stats.totalPoints).toBe(69);
     });
   });
 });

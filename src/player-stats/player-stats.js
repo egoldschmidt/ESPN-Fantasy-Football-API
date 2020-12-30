@@ -3,6 +3,12 @@ import _ from 'lodash';
 import BaseObject from '../base-classes/base-object/base-object';
 
 /**
+ * @typedef {object} PlayerStatsBundle
+ * @property {PlayerStats} points Player performance info, expressed in fantasy points.
+ * @property {PlayerStats} stats Player performance info, expressed in activity stats.
+ */
+
+/**
  * Represents statistical values for a player's fantasy performance. The values may be real
  * statistical values (yards, attempts, etc) or fantasy point values.
  *
@@ -10,12 +16,15 @@ import BaseObject from '../base-classes/base-object/base-object';
  * largest missing piece is IDP scoring.
  *
  * @augments {BaseObject}
+ * @property {boolean} usesPoints Whether this tracks points or raw activities.
+ * @property {number} totalPoints A summation of all accrued points; only valid if `usesPoints` is true.
  */
 class PlayerStats extends BaseObject {
   constructor(options = {}) {
     super(options);
 
     this.usesPoints = options.usesPoints;
+    this.totalPoints = null;
   }
 
   static displayName = 'PlayerStats';
@@ -151,18 +160,38 @@ class PlayerStats extends BaseObject {
     defensive500To549YardsAllowed: '135',
     defensiveOver550YardsAllowed: '136'
   };
+
+  onPopulate() {
+    // Compute total points once all other fields have been set
+    if (this.usesPoints) {
+      this.totalPoints = 0;
+      Object.keys(this.constructor.responseMap).forEach((key) => {
+        let stat = this[key];
+        if (Number.isFinite(stat)) {
+          this.totalPoints += stat;
+        }
+      });
+    }
+  }
 }
 
 export const parsePlayerStats = ({
-  responseData, constructorParams, usesPoints, seasonId, statKey, statSourceId, statSplitTypeId
+  responseData, constructorParams, usesPoints, seasonId, scoringPeriodId, statKey, statSourceId, statSplitTypeId
 }) => {
   const filters = { statSourceId, statSplitTypeId };
 
   if (seasonId) {
     filters.seasonId = seasonId;
   }
+  if (scoringPeriodId) {
+    filters.scoringPeriodId = scoringPeriodId;
+  }
 
   const statData = _.find(responseData.player.stats, filters);
+  if (!statData) {
+    return null;
+  }
+
   const params = _.assign({}, constructorParams, { usesPoints });
   return PlayerStats.buildFromServer(_.get(statData, statKey), params);
 };

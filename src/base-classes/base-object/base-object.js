@@ -187,6 +187,12 @@ class BaseObject {
       });
     });
 
+    // Allow instances to receive a callback once base population is done
+    // such that they can populate derived fields as necessary.
+    if (instance.onPopulate) {
+      instance.onPopulate();
+    }
+
     return instance;
   }
 
