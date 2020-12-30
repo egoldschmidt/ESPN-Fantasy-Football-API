@@ -1,20 +1,24 @@
 name: CI
 
-on: [push]
+on:
+  push:
+    tags-ignore:
+      - 'v*'
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js
-        uses: actions/setup-node@v1
+      - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
       - name: Install dependencies
         run: yarn
-      - name: Build & test
-        run: yarn ci && yarn test:integration
+      - name: Build, lint, and run unit tests
+        run: yarn ci
+      - name: Integration tests
+        run: yarn test:integration
         env:
           SWID: ${{ secrets.SWID }}
           ESPN_S2: ${{ secrets.ESPN_S2 }}

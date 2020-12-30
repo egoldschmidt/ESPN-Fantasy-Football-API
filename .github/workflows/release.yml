@@ -7,21 +7,25 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'egoldschmidt'
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
           registry-url: https://npm.pkg.github.com/
-          always-auth: true
+          scope: "@egoldschmidt"
+      - name: Configure NPM
+        run: |
+          echo "@egoldschmidt:registry=https://npm.pkg.github.com/" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> .npmrc
+          git branch --show-current # Debugging
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set version from release
+        run: yarn version --new-version=$(git branch --show-current | cut -dv -f2)
       - name: Install dependencies
-        run: yarn
+        run: yarn install
       - name: Build & test
-        run: yarn ci && yarn test:integration
-        env:
-          SWID: ${{ secrets.SWID }}
-          ESPN_S2: ${{ secrets.ESPN_S2 }}
-          LEAGUE_ID: ${{ secrets.LEAGUE_ID }}
-      - run: echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc && yarn publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: yarn build
+      - run: yarn publish

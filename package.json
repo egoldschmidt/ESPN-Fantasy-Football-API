@@ -1,6 +1,6 @@
 {
-  "name": "espn-fantasy-football-api",
-  "version": "0.16.1",
+  "name": "@egoldschmidt/espn-fantasy-football-api",
+  "version": "0.0.1",
   "description": "A Javascript API to connect to ESPN's fantasy football API",
   "main": "web.js",
   "files": [
@@ -77,5 +77,8 @@
   "dependencies": {
     "axios": "^0.20.0",
     "lodash": "^4.17.20"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   }
 }
