@@ -22,6 +22,6 @@ jobs:
           SWID: ${{ secrets.SWID }}
           ESPN_S2: ${{ secrets.ESPN_S2 }}
           LEAGUE_ID: ${{ secrets.LEAGUE_ID }}
-      - run: yarn publish
+      - run: echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc && yarn publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
