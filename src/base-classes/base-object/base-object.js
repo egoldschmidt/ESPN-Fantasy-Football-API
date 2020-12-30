@@ -187,12 +187,6 @@ class BaseObject {
       });
     });
 
-    // Allow instances to receive a callback once base population is done
-    // such that they can populate derived fields as necessary.
-    if (instance.onPopulate) {
-      instance.onPopulate();
-    }
-
     return instance;
   }
 
@@ -212,6 +206,12 @@ class BaseObject {
     this._populateObject({
       data: dataToUse, constructorParams, instance, isDataFromServer: true
     });
+
+    // Allow instances to receive a callback once base population is done
+    // such that they can populate derived fields as necessary.
+    if (instance.onPopulate) {
+      instance.onPopulate();
+    }
 
     return instance;
   }
