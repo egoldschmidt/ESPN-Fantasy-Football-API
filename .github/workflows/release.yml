@@ -19,11 +19,10 @@ jobs:
         run: |
           echo "@egoldschmidt:registry=https://npm.pkg.github.com/" > .npmrc
           echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> .npmrc
-          git branch --show-current # Debugging
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Set version from release
-        run: yarn version --new-version=$(git branch --show-current | cut -dv -f2)
+        run: yarn version --new-version=$(echo $GITHUB_REF | cut -dv -f2) --no-git-tag-version
       - name: Install dependencies
         run: yarn install
       - name: Build & test
