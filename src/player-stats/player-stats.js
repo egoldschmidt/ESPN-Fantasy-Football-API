@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import BaseObject from '../base-classes/base-object/base-object';
+import { statSplitTypes } from '../constants';
 
 /**
  * @typedef {object} PlayerStatsBundle
@@ -18,13 +19,16 @@ import BaseObject from '../base-classes/base-object/base-object';
  * @augments {BaseObject}
  * @property {boolean} usesPoints Whether this tracks points or raw activities.
  * @property {number} totalPoints A summation of all accrued points; only valid if `usesPoints` is true.
+ * @property {string} gameId The ESPN game ID in which these stats were generated, if relevant.
  */
 class PlayerStats extends BaseObject {
   constructor(options = {}) {
     super(options);
 
     this.usesPoints = options.usesPoints;
-    this.totalPoints = null;
+    if (options.gameId) {
+      this.gameId = options.gameId;
+    }
   }
 
   static displayName = 'PlayerStats';
@@ -176,7 +180,7 @@ class PlayerStats extends BaseObject {
 }
 
 export const parsePlayerStats = ({
-  responseData, constructorParams, usesPoints, seasonId, scoringPeriodId, statKey, statSourceId, statSplitTypeId
+  responseData, constructorParams, usesPoints, seasonId, scoringPeriodId, gameId, statKey, statSourceId, statSplitTypeId
 }) => {
   const filters = { statSourceId, statSplitTypeId };
 
@@ -193,6 +197,13 @@ export const parsePlayerStats = ({
   }
 
   const params = _.assign({}, constructorParams, { usesPoints });
+
+  // Pass the ESPN stat's `externalId` into the PlayerStat as `gameId`
+  // if we're looking at game-level splits.
+  if (statSplitTypeId == statSplitTypes.game && statData.externalId) {
+    params.gameId = statData.externalId
+  }
+
   return PlayerStats.buildFromServer(_.get(statData, statKey), params);
 };
 
