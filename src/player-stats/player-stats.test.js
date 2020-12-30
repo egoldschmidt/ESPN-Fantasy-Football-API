@@ -98,7 +98,7 @@ describe('parsePlayerStats', () => {
 
       expect(stats).toBeInstanceOf(PlayerStats);
       expect(stats.rushingYards).toBe(318);
-      expect(stats.totalPoints).toBe(null);
+      expect(stats.totalPoints).toBe(undefined);
     });
   });
 
