@@ -8,6 +8,7 @@ import {
   statSources,
   maxScoringPeriodId
 } from '../constants.js';
+import Transaction from '../transaction/transaction';
 
 /* global PlayerStatsBundle */
 
@@ -122,6 +123,17 @@ class PlayerSeason extends BaseObject {
           }
         }
         return weeklyData;
+      }
+    },
+    transactions: {
+      key: 'transactions',
+      manualParse: (responseData, data) => {
+        if (!responseData) {
+          return null;
+        }
+        return responseData.map((transaction) => (
+          Transaction.buildFromServer(transaction, { playerId: data.player.id })
+        ));
       }
     }
   };
