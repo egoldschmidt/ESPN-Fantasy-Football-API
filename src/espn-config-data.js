@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 // Raw config data used by ESPN in their web app.
 // This is considered the soure of truth for stat IDs, stat split types, and stat source IDs.
 //

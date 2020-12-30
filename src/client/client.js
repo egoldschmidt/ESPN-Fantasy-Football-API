@@ -5,6 +5,7 @@ import Boxscore from '../boxscore/boxscore';
 import FreeAgentPlayer from '../free-agent-player/free-agent-player';
 import League from '../league/league';
 import NFLGame from '../nfl-game/nfl-game';
+import PlayerSeason from '../player-season/player-season';
 import Team from '../team/team';
 
 axios.defaults.baseURL = 'https://fantasy.espn.com/apis/v3/games/ffl/seasons/';
@@ -202,6 +203,78 @@ class Client {
     return axios.get(route, this._buildAxiosConfig()).then((response) => {
       const data = _.get(response.data, 'settings');
       return League.buildFromServer(data, { leagueId: this.leagueId, seasonId });
+    });
+  }
+
+  /**
+   * Returns stats for a player over an entire season.
+   *
+   * @param   {object} options Required options object.
+   * @param   {number} options.seasonId The season to grab data from.
+   * @param   {number} options.playerId The player to grab data for.
+   * @returns {PlayerSeason} The player's season stats.
+   */
+  getPlayerSeason({ seasonId, playerId }) {
+    return this._getPriorPlayerSeason({ seasonId, playerId }).catch((error) => {
+      // The historical data endpoint does not work for the current season.
+      // Detect this as a 404 and retry the request against the new endpoint.
+      // Inelegant, but works well enough and avoids downstream customers needing
+      // to deal with current vs. previous season details.
+      if (error.response.status == 404) {
+        return this._getCurrentPlayerSeason({ seasonId, playerId });
+      } else {
+        throw error;
+      }
+    });
+  }
+
+  _getCurrentPlayerSeason({ seasonId, playerId }) {
+    const route = this.constructor._buildRoute({
+      base: `${seasonId}/segments/0/leagues/${this.leagueId}`,
+      params: `?view=kona_playercard`
+    });
+
+    const config = this._buildAxiosConfig({
+      headers: {
+        'x-fantasy-filter': JSON.stringify({
+          players: {
+            filterIds: {value: [playerId]},
+            filterStatsForTopScoringPeriodIds: {
+              value: 17, // Somehow this seems to request each week's data
+              additionalValue: [
+                `00${seasonId}`, // Season actuals
+                `01${seasonId}`  // Season projections
+              ]
+            },
+          }
+        })
+      }
+    });
+
+    return axios.get(route, config).then((response) => {
+      return PlayerSeason.buildFromServer(response.data.players[0], { leagueId: this.leagueId, seasonId });
+    });
+  }
+
+  _getPriorPlayerSeason({ seasonId, playerId }) {
+    const route = this.constructor._buildRoute({
+      base: `/leagueHistory/${this.leagueId}`,
+      params: `?view=kona_playercard&seasonId=${seasonId}`
+    });
+
+    const config = this._buildAxiosConfig({
+      baseURL: 'https://fantasy.espn.com/apis/v3/games/ffl',
+      headers: {
+        'x-fantasy-filter': JSON.stringify({
+          players: {
+            filterIds: {value: [playerId]},
+          }
+        })
+      }
+    });
+
+    return axios.get(route, config).then((response) => {
+      return PlayerSeason.buildFromServer(response.data[0].players[0], { leagueId: this.leagueId, seasonId });
     });
   }
 
