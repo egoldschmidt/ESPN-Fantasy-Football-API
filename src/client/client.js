@@ -209,25 +209,56 @@ class Client {
   /**
    * Returns stats for a player over an entire season.
    *
+   * There is some messiness here in how the ESPN data works for historical years.
+   * Over time they've changed what they store, how they store it, and how they
+   * expose it through APIs. This function attempts to use "old" and "new" endpoints
+   * to maximize the amount and consistency of data across all years. That said,
+   * there's only so much we can do. Caveats:
+   *
+   * - Transaction info is totally absent 2017 and earlier, and seems available but invalid in 2018
+   *
    * @param   {object} options Required options object.
    * @param   {number} options.seasonId The season to grab data from.
    * @param   {number} options.playerId The player to grab data for.
    * @returns {PlayerSeason} The player's season stats.
    */
-  getPlayerSeason({ seasonId, playerId }) {
-    return this._getPriorPlayerSeason({ seasonId, playerId }).catch((error) => {
-      // The historical data endpoint does not work for the current season.
-      // Detect this as a 404 and retry the request against the new endpoint.
-      // Inelegant, but works well enough and avoids downstream customers needing
-      // to deal with current vs. previous season details.
-      if (error.response.status === 404) {
-        return this._getCurrentPlayerSeason({ seasonId, playerId });
+  async getPlayerSeason({ seasonId, playerId }) {
+    // 2017 and earlier, there's only one game in town.
+    if (seasonId <= 2017) {
+      return this._getPlayerSeasonWithHistoricalAPI({ seasonId, playerId });
+    }
+
+    // For "modern" years, query both backends in parallel
+    const modernPromise = this._getPlayerSeasonWithModernAPI({ seasonId, playerId });
+    const historicalPromise = this._getPlayerSeasonWithHistoricalAPI({ seasonId, playerId }).catch(
+      (error) => {
+        if (error.response.status === 404) {
+          // Assume this indicates that we're querying for the current season,
+          // which does not exist in the historical backend. Carry on.
+          return null;
+        }
+        throw error;
       }
-      throw error;
-    });
+    );
+
+    const modernResult = await modernPromise;
+    const historicalResult = await historicalPromise;
+
+    // Combine results.
+    if (modernResult && !historicalResult) {
+      return modernResult;
+    } else if (!modernResult && historicalResult) {
+      return historicalResult;
+    }
+
+    // Ugh. The old endpoint only has transactions *with prices* for 2019 onward :(
+    if (seasonId >= 2019) {
+      historicalResult.transactions = modernResult.transactions;
+    }
+    return historicalResult;
   }
 
-  _getCurrentPlayerSeason({ seasonId, playerId }) {
+  _getPlayerSeasonWithModernAPI({ seasonId, playerId }) {
     const route = this.constructor._buildRoute({
       base: `${seasonId}/segments/0/leagues/${this.leagueId}`,
       params: '?view=kona_playercard'
@@ -255,7 +286,7 @@ class Client {
     ));
   }
 
-  _getPriorPlayerSeason({ seasonId, playerId }) {
+  _getPlayerSeasonWithHistoricalAPI({ seasonId, playerId }) {
     const route = this.constructor._buildRoute({
       base: `/leagueHistory/${this.leagueId}`,
       params: `?view=kona_playercard&seasonId=${seasonId}`

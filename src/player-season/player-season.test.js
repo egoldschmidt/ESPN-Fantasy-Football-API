@@ -82,13 +82,56 @@ describe('PlayerSeason', () => {
 
       data = {
         player: {
+          id: 12483,
           stats: [
             seasonProjectedStats,
             seasonActualStats,
             weeklyActualStats1,
             weeklyActualStats2
           ]
-        }
+        },
+        transactions: [
+          {
+            bidAmount: 2,
+            id: 'b286e9e8-e8f3-445b-90c8-eed71719e265',
+            items: [
+              {
+                fromTeamId: 0,
+                isKeeper: false,
+                overallPickNumber: 84,
+                playerId: 12483,
+                toTeamId: 2,
+                type: 'DRAFT'
+              }
+            ],
+            scoringPeriodId: 1,
+            teamId: 2,
+            type: 'DRAFT'
+          },
+          {
+            bidAmount: 3,
+            id: '9fd6ce3a-6812-4714-9e49-8ad3d0d3434b',
+            items: [
+              {
+                fromTeamId: 0,
+                isKeeper: false,
+                playerId: -16026,
+                toTeamId: 2,
+                type: 'ADD'
+              },
+              {
+                fromTeamId: 2,
+                isKeeper: false,
+                playerId: 12483,
+                toTeamId: 0,
+                type: 'DROP'
+              }
+            ],
+            scoringPeriodId: 4,
+            teamId: 2,
+            type: 'WAIVER'
+          }
+        ]
       };
     });
 
@@ -140,6 +183,17 @@ describe('PlayerSeason', () => {
           expect(Object.keys(player.weeklyActual).length).toEqual(2);
           expect(player.weeklyActual[15].points.totalPoints).toEqual(3.1);
           expect(player.weeklyActual[16].points.totalPoints).toEqual(5.2);
+        });
+      });
+    });
+
+    describe('transactions', () => {
+      describe('manualParse', () => {
+        test('maps transactions to an array of Transaction instances', () => {
+          const player = buildPlayerSeason(data, { seasonId });
+          expect(player.transactions.length).toEqual(2);
+          expect(player.transactions[0].action).toEqual('DRAFT');
+          expect(player.transactions[1].action).toEqual('DROP');
         });
       });
     });

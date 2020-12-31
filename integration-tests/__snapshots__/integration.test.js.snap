@@ -46197,6 +46197,7 @@ PlayerSeason {
     "points": null,
     "stats": null,
   },
+  "transactions": null,
   "weeklyActual": Object {},
 }
 `;
@@ -46266,6 +46267,7 @@ PlayerSeason {
       "usesPoints": false,
     },
   },
+  "transactions": null,
   "weeklyActual": Object {
     "1": Object {
       "points": PlayerStats {
@@ -46583,6 +46585,17 @@ PlayerSeason {
       "usesPoints": false,
     },
   },
+  "transactions": Array [
+    Transaction {
+      "action": "DRAFT",
+      "cost": 51,
+      "fromTeamId": 0,
+      "id": "a7fc7604-4eee-4eae-b3d2-f59133cfd664",
+      "isKeeper": false,
+      "scoringPeriodId": 1,
+      "toTeamId": 5,
+    },
+  ],
   "weeklyActual": Object {
     "1": Object {
       "points": PlayerStats {
@@ -46864,6 +46877,17 @@ PlayerSeason {
     "points": null,
     "stats": null,
   },
+  "transactions": Array [
+    Transaction {
+      "action": "DRAFT",
+      "cost": 46,
+      "fromTeamId": 0,
+      "id": "52905cf1-c906-4a79-a91c-7975c397fdd0",
+      "isKeeper": false,
+      "scoringPeriodId": 1,
+      "toTeamId": 4,
+    },
+  ],
   "weeklyActual": Object {
     "1": Object {
       "points": PlayerStats {
