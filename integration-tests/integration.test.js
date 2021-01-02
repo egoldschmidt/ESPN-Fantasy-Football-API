@@ -45,6 +45,14 @@ describe('client integration tests', () => {
     });
   });
 
+  describe('getAllPlayers', () => {
+    test('returns a list of all players', async () => {
+      const players = await client.getAllPlayers({ seasonId: 2020, limit: 10 });
+      expect(players).toMatchSnapshot();
+      expect(players.length).toEqual(10);
+    });
+  });
+
   describe('getFreeAgents', () => {
     test('returns a populated array of FreeAgentPlayers', async () => {
       const players = await client.getFreeAgents({
