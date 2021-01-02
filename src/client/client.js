@@ -6,6 +6,7 @@ import FreeAgentPlayer from '../free-agent-player/free-agent-player';
 import League from '../league/league';
 import NFLGame from '../nfl-game/nfl-game';
 import PlayerSeason from '../player-season/player-season';
+import Player from '../player/player';
 import Team from '../team/team';
 
 axios.defaults.baseURL = 'https://fantasy.espn.com/apis/v3/games/ffl/seasons/';
@@ -139,6 +140,55 @@ class Client {
       const data = _.get(response.data, 'players');
       return _.map(data, (player) => (
         FreeAgentPlayer.buildFromServer(player, { leagueId: this.leagueId, seasonId })
+      ));
+    });
+  }
+
+  /**
+   * Returns an array of Player objects representing each player in the FF league for a season.
+   * This call fetches and returns a bunch of data. Expect about ~3-4mb of raw data loaded from
+   * ESPN for the ~1000 offensive players in a given season.
+   *
+   * @param  {object} options Required options object.
+   * @param  {number} options.seasonId The season to grab data from.
+   * @param  {number} options.limit Optional number of players to return.
+   * @param  {number} options.offset Optional offset.
+   * @returns {Player[]} The list of players.
+   */
+  getAllPlayers({ seasonId, limit = 2000, offset = 0 }) {
+    const route = this.constructor._buildRoute({
+      base: `${seasonId}/segments/0/leagues/${this.leagueId}`,
+      params: '?view=kona_player_info'
+    });
+
+    const config = this._buildAxiosConfig({
+      headers: {
+        'x-fantasy-filter': JSON.stringify({
+          players: {
+            limit,
+            offset,
+            // It appears having *some* sort is a requirement, else 400.
+            sortName: {
+              sortAsc: true,
+              sortPriority: 1
+            },
+            // Decreases payload size by ~62% by minimizing rank data
+            filterRanksForScoringPeriodIds: {
+              value: [-1]
+            },
+            // Decreases payload size by ~27% by minimizing stat data
+            filterStatsForTopScoringPeriodIds: {
+              value: 1
+            }
+          }
+        })
+      }
+    });
+
+    return axios.get(route, config).then((response) => {
+      const data = _.get(response.data, 'players');
+      return _.map(data, (player) => (
+        Player.buildFromServer(player, { leagueId: this.leagueId, seasonId })
       ));
     });
   }

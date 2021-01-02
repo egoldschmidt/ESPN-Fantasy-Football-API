@@ -45,6 +45,25 @@ describe('client integration tests', () => {
     });
   });
 
+  describe('getAllPlayers', () => {
+    test('returns a list of all players', async () => {
+      const players = await client.getAllPlayers({ seasonId: 2020, limit: 10 });
+
+      // A few properties are expected to shift dynamically over the season.
+      // To avoid too much test breakage, null them out before comparing against
+      // the snapshot:
+      /* eslint-disable no-restricted-syntax */
+      for (const p of players) {
+        p.percentOwned = -1;
+        p.percentStarted = -1;
+        p.percentChange = -1;
+      }
+
+      expect(players).toMatchSnapshot();
+      expect(players.length).toEqual(10);
+    });
+  });
+
   describe('getFreeAgents', () => {
     test('returns a populated array of FreeAgentPlayers', async () => {
       const players = await client.getFreeAgents({
