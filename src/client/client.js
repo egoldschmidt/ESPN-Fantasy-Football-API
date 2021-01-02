@@ -167,11 +167,10 @@ class Client {
           players: {
             limit,
             offset,
-            // It appears having *some* sort is a requirement, else 400
-            sortDraftRanks: {
-              sortPriority: 100,
+            // It appears having *some* sort is a requirement, else 400.
+            sortName: {
               sortAsc: true,
-              value: 'STANDARD'
+              sortPriority: 1
             },
             // Decreases payload size by ~62% by minimizing rank data
             filterRanksForScoringPeriodIds: {
